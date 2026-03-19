@@ -99,7 +99,7 @@ PersonalBlog/
 
 #### 2.3.1 概要设计
 ##### 模块划分
-    * 内容服务 (Content Service): 负责“学习记录”、“生活随笔”、“兴趣使然”的逻辑。
+    * 笔记服务 (Note Service): 负责“学习记录”、“生活随笔”、“兴趣使然”的逻辑。
     * 追番服务 (Anime Service): 负责对接 **Bangumi API** 和进度管理。
     * 打卡服务 (Check-in Service): 处理每日任务逻辑（V2.0 重点）。
     * 文件服务 (File Service): 专门封装对 **MinIO** 的操作。
