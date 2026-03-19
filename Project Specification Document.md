@@ -191,20 +191,20 @@ public record PageData<T>(
 后端 `HomeService` 负责编排应用内部各业务 Service 组件的数据抓取。虽然是单体架构，但为了优化数据库查询性能（减少串行等待），建议在 `HomeService` 内部采用多线程并行查询。
 *   **输入**: 无需入参（或可选年份/月份用于日历标记）。
 *   **数据聚合逻辑**:
-    1. 调用 `ContentService.getCountsGroupByModule()`：从 `blog_content` 表按模块类型统计数量。
+    1. 调用 `NoteService.getCountsGroupByModule()`：从 `blog_note` 表按模块类型统计数量。
     2. 调用 `AnimeService.getWatchingCount()`：从 `blog_anime_progress` 统计“在看”番剧。
-    3. 调用 `ActivityService.getLatestActivities(5)`：聚合文章与进度的最新时间戳记录。
+    3. 调用 `ActivityService.getLatestActivities(5)`：聚合笔记与进度的最新时间戳记录。
     4. 构造 `DashboardVO` 并返回。
 *   **性能建议**: 即使在单体中，也可使用 `CompletableFuture.supplyAsync()` 来并发执行上述 3 个查询任务，最后由 `join()` 汇总结果，显著降低接口 RT（响应时间）。
 
 ---
 
-##### 3. 内容模块 (Content Module)
+##### 3. 笔记模块 (Note Module)
 
 ###### 3.1 扩展数据库 Schema 设计
-内容模块采用多表关联方案，以支持结构化知识管理。
+笔记模块采用多表关联方案，以支持结构化知识管理。
 
-**A. 内容主表 (`blog_content`)**
+**A. 笔记主表 (`blog_note`)**
 | 字段名 | 类型 | 约束 | 描述 |
 | :--- | :--- | :--- | :--- |
 | `id` | `BIGINT` | `PK, AUTO` | 主键 (分布式 ID 或自增) |
@@ -224,20 +224,20 @@ public record PageData<T>(
 | `id` | `BIGINT` | `PK, AUTO` | 标签 ID |
 | `name` | `VARCHAR(50)` | `UNIQUE` | 标签名称 (如: Java, 摄影) |
 
-**C. 内容-标签关联表 (`blog_content_tag`)**
+**C. 笔记-标签关联表 (`blog_note_tag`)**
 | 字段名 | 类型 | 约束 | 描述 |
 | :--- | :--- | :--- | :--- |
-| `content_id` | `BIGINT` | `INDEX` | 内容 ID |
+| `note_id` | `BIGINT` | `INDEX` | 笔记 ID |
 | `tag_id` | `BIGINT` | `INDEX` | 标签 ID |
 
 ###### 3.2 核心 API 规范
-*   **保存/更新文章 (`POST /api/content/save`)**:
+*   **保存/更新笔记 (`POST /api/note/save`)**:
     *   **幂等逻辑**: 根据入参 `id` 是否为空判断 `Insert` 或 `Update`。
     *   **标签处理**: 自动维护 `blog_tag` 的唯一性，并增量更新关联表（先删后增）。
-*   **分页列表查询 (`GET /api/content/list`)**:
+*   **分页列表查询 (`GET /api/note/list`)**:
     *   **请求参数**: `pageNum` (默认1), `pageSize` (默认10), `module_type`, `tagId`, `keyword`。
-    *   **性能规范**: 该接口**严禁返回 `content` 字段**。返回数据负载为 `PageData<ContentListVO>`。
-*   **详情获取 (`GET /api/content/{id}`)**:
+    *   **性能规范**: 该接口**严禁返回 `content` 字段**。返回数据负载为 `PageData<NoteListVO>`。
+*   **详情获取 (`GET /api/note/{id}`)**:
     *   **响应内容**: 返回完整 Markdown 及关联的标签列表。
     *   **统计更新**: 接口触发时异步增加 `views` 计数。
 
