@@ -115,6 +115,7 @@ PersonalBlog/
 * **辅助依赖**:
     * `Lombok`: 消除样板代码。
     * `Spring Validation`: 后端接口入参自动化校验。
+    * `Knife4j 4.x` (OpenAPI 3): 自动生成在线接口文档，支持中文 UI、分组与调试。
 
 **前端 (Frontend)**
 * **核心框架**: `Vue 3 (Composition API)` + `Vite`
